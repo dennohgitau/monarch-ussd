@@ -7,9 +7,62 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def index(request):
     def gurumishaTPO():
+        # Retrieve session variables, or initialize them if not already set
+        plate_number = request.session.get('plate_number')
+        chassis_number = request.session.get('chassis_number')
+        vehicle_make = request.session.get('vehicle_make')
+        valid_license = request.session.get('valid_license')
         
-        print('You are now in Gurumisha')
-        return JsonResponse({'success': 'You are now accessing gurumisha TPO'}, status=500)
+        if text == '3*1':
+            response = "CON Enter Vehicle Details:\n"
+            response += "1. Enter Plate Number\n"
+            return HttpResponse(response, content_type='text/plain')
+        
+        elif text.startswith('3*1*1'):
+            plate_number = text.split('*')[-1]
+            request.session['plate_number'] = plate_number  # Store in session
+            response = "CON Enter Chassis Number:\n"
+            return HttpResponse(response, content_type='text/plain')
+        
+        elif text.startswith('3*1*2'):
+            chassis_number = text.split('*')[-1]
+            request.session['chassis_number'] = chassis_number  # Store in session
+            response = "CON Select Vehicle Make:\n"
+            response += "1. Toyota\n2. Honda\n3. Ford\n4. Other"
+            return HttpResponse(response, content_type='text/plain')
+        
+        elif text.startswith('3*1*3'):
+            vehicle_make_option = text.split('*')[-1]
+            if vehicle_make_option == '4':  # Other
+                response = "CON Enter Vehicle Make:"
+                return HttpResponse(response, content_type='text/plain')
+            else:
+                vehicle_make = ["Toyota", "Honda", "Ford"][int(vehicle_make_option) - 1]
+                request.session['vehicle_make'] = vehicle_make  # Store in session
+                response = "CON Valid Driving License (Yes or No):"
+                return HttpResponse(response, content_type='text/plain')
+        
+        elif text.startswith('3*1*4'):
+            if request.session.get('vehicle_make') is None:  # Custom make entered by user
+                vehicle_make = text.split('*')[-1]
+                request.session['vehicle_make'] = vehicle_make  # Store in session
+            response = "CON Valid Driving License (Yes or No):"
+            return HttpResponse(response, content_type='text/plain')
+        
+        elif text.startswith('3*1*5'):
+            valid_license = text.split('*')[-1].lower() == 'yes'
+            request.session['valid_license'] = valid_license  # Store in session
+            
+            # Log the collected data
+            logger.debug(f"Plate Number: {request.session.get('plate_number')}")
+            logger.debug(f"Chassis Number: {request.session.get('chassis_number')}")
+            logger.debug(f"Vehicle Make: {request.session.get('vehicle_make')}")
+            logger.debug(f"Valid Driving License: {request.session.get('valid_license')}")
+            
+            response = "END Thank you for providing your vehicle details. We will process your insurance request."
+            return HttpResponse(response, content_type='text/plain')
+
+        return HttpResponse("END Unexpected input. Please try again.", content_type='text/plain')
     
     def motor_Commercial():
         print('You are now in Motor Commercial')
